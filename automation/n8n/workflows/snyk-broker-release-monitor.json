@@ -1,0 +1,49 @@
+{
+  "name": "Snyk Broker Release Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "3a74da23-0892-40c7-8f7a-3f4b3e99d1a1",
+      "name": "Every 24 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "command": "node /files/scripts/check-snyk-broker-release.mjs || true"
+      },
+      "id": "c46cbbe3-b113-4b7b-9a3d-259dd7dfb855",
+      "name": "Check Snyk Broker Release Feed",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [520, 300]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 24 Hours": {
+      "main": [[{"node": "Check Snyk Broker Release Feed", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "versionId": "d024e02d-7ca0-46fd-9ae4-e3b0e7b9d3b6",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [{"name": "snyk"}, {"name": "broker"}, {"name": "security"}]
+}
