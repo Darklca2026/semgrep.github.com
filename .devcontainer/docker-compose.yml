@@ -1,0 +1,36 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    command: sleep infinity
+    volumes:
+      - ..:/workspaces/${LOCAL_WORKSPACE_FOLDER_BASENAME:-semgrep.github.com}:cached
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_HOST: 0.0.0.0
+      N8N_PORT: 5678
+      N8N_PROTOCOL: https
+      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL:-}
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-}
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:-change-this-password}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-change-this-32-character-key-now}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "true"
+      GITHUB_OWNER: ${GITHUB_OWNER:-Darklca2026}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      REPO_REVIEW_CREATE_ISSUES: ${REPO_REVIEW_CREATE_ISSUES:-false}
+      REPO_REVIEW_MIN_SEVERITY: ${REPO_REVIEW_MIN_SEVERITY:-high}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ../automation/n8n:/files:ro
+
+volumes:
+  n8n_data:
