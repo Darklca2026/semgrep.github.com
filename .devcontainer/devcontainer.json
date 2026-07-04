@@ -1,0 +1,32 @@
+{
+  "name": "semgrep.github.com + n8n security automation",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [5678],
+  "portsAttributes": {
+    "5678": {
+      "label": "n8n",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.vscode-codeql",
+        "GitHub.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "semgrep.semgrep",
+        "SonarSource.sonarlint-vscode",
+        "snyk-security.snyk-vulnerability-scanner"
+      ]
+    }
+  },
+  "postStartCommand": "echo 'n8n is available on forwarded port 5678 after the n8n service starts.'"
+}
