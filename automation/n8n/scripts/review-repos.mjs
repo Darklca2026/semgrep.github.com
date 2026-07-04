@@ -61,14 +61,17 @@ function repoFullName(repo) {
 }
 
 function severityOf(alert) {
-  return (
-    alert.rule?.security_severity_level ||
-    alert.rule?.severity ||
-    alert.security_advisory?.cvss?.score && Number(alert.security_advisory.cvss.score) >= 9 ? 'critical' :
-    alert.security_vulnerability?.severity ||
-    alert.secret_type_display_name && 'critical' ||
-    'medium'
-  ).toLowerCase();
+  let severity = alert.rule?.security_severity_level || alert.rule?.severity || alert.security_vulnerability?.severity;
+
+  if (!severity && alert.security_advisory?.cvss?.score) {
+    severity = Number(alert.security_advisory.cvss.score) >= 9 ? 'critical' : 'high';
+  }
+
+  if (!severity && alert.secret_type_display_name) {
+    severity = 'critical';
+  }
+
+  return String(severity || 'medium').toLowerCase();
 }
 
 function shouldReport(alert) {
@@ -81,6 +84,16 @@ async function safeList(path) {
     return await githubPaginated(path);
   } catch (error) {
     return { error: error.message, items: [] };
+  }
+}
+
+async function listOwnedRepos() {
+  try {
+    const repos = await githubPaginated('/user/repos?affiliation=owner&sort=updated');
+    return repos.filter((repo) => repo.owner?.login?.toLowerCase() === owner.toLowerCase());
+  } catch (error) {
+    console.warn(`Falling back to public repository listing: ${error.message}`);
+    return githubPaginated(`/users/${owner}/repos?type=owner&sort=updated`);
   }
 }
 
@@ -106,7 +119,7 @@ async function ensureIssue(repo, summary) {
 
   const issue = await github(`/repos/${repoFullName(repo)}/issues`, {
     method: 'POST',
-    body: JSON.stringify({ title, body, labels: ['security', 'automated-review'] })
+    body: JSON.stringify({ title, body })
   });
 
   return issue.html_url;
@@ -138,7 +151,7 @@ async function reviewRepo(repo) {
   return summary;
 }
 
-const repos = await githubPaginated(`/users/${owner}/repos?type=owner&sort=updated`);
+const repos = await listOwnedRepos();
 const activeRepos = repos.filter((repo) => !repo.archived);
 const results = [];
 
